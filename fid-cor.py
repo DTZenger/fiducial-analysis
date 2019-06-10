@@ -40,9 +40,9 @@ class Fids:
                 self.dist_data[i][j]=self.dist_data[j][i]=np.linalg.norm(self.points[i].means-self.points[j].means)
     
     def angles(self):
-        diff=self.points[0].means-self.points[1].means
+        diff=self.points[0].means-self.points[3].means
         a1=np.arctan(diff[1]/diff[0])
-        diff=self.points[3].means-self.points[2].means
+        diff=self.points[2].means-self.points[1].means
         a2=np.arctan(diff[1]/diff[0])
         
         print("\n{} {}\n".format(a1,a2))
@@ -82,12 +82,12 @@ class Fids:
         
         plt.show()
         
-F=Fids('6-6-PatternMatchPosition-MarkG.csv')
+F=Fids('6-10-PatternMatchPosition-G.csv')
 F.pointDist()
 #F.angles()
 print("\n")
 
-data=pd.read_csv("6-6-Coords.csv", sep=',',header=None)#read csv
+data=pd.read_csv("6-10-Coords.csv", sep=',',header=None)#read csv
 data=np.array(data)#Turn into numpy array
 data=np.delete(data,2,1)#delete z coordinate column - not needed and saves computation time
 print(data)
