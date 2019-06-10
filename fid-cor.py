@@ -6,6 +6,8 @@ import glob
 def get_means(x):
     return(x.mean())
 
+
+
 class point:
     
     def __init__(self,data):
@@ -64,21 +66,22 @@ class Fids:
             diff=abs(v2-v1)
             print(diff)
 
-    def plotFid(self):
+    def plotFid(self,point_data):
         plt.figure()
-        """
-        #Plot lines
-        for i in range(4):
-            for j in range(i,4):
-                x1,x2=self.data_mean[i][0],self.data_mean[j][0]
-                y1,y2=self.data_mean[i][1],self.data_mean[j][1]
-                plt.plot([x1,x2],[y1,y2],'-k')
-        """
-        #plot points
-        for i in range(4):
-            plt.plot(self.points[i].means[0],self.points[i].means[1],'o')
-    
+
+        #plot fiducial points
+        x=np.array([])
+        y=np.array([])
+        for i in self.points:
+            x=np.append(x,i.means[0])
+            y=np.append(y,i.means[1])
+            
+        plt.plot(x,y,'o',label='Fiducial Points')
         
+        #now plot corner points
+        xc,yc=point_data.T
+        plt.plot(xc,yc,'r^',label='Corner')
+        plt.legend()
         
         plt.show()
         
@@ -93,4 +96,4 @@ data=np.delete(data,2,1)#delete z coordinate column - not needed and saves compu
 print(data)
 F.cornerFidDist(data)
 
-#F.plotFid()
+F.plotFid(data)
