@@ -5,6 +5,9 @@ import glob
 
 def get_means(x):
     return(x.mean())
+    
+def get_ster(x):
+    return(x.std()/np.sqrt(5))
 
 
 
@@ -13,7 +16,7 @@ class point:
     def __init__(self,data):
         self.data=data#nx2 array n is number of trials
         self.means=np.apply_along_axis(get_means,0,data)#1x2 array [x,y]
-        print(self.means)
+        self.ster=np.apply_along_axis(get_ster,0,data)
 
 class Fids:
     
@@ -34,12 +37,35 @@ class Fids:
             x=np.array([])
             
         self.dist_data=np.zeros([4,4])
+        self.dist_data_error=np.zeros([4,4])
 
     #This function calculates the distance between two points
     def pointDist(self):
         for i in range(4):
-            for j in range(i,4):
+            for j in range(i+1,4):
                 self.dist_data[i][j]=self.dist_data[j][i]=np.linalg.norm(self.points[i].means-self.points[j].means)
+                x1=self.points[i].means[0]
+                x1_err=self.points[i].ster[0]
+                x2=self.points[j].means[0]
+                x2_err=self.points[j].ster[0]
+                y1=self.points[i].means[1]
+                y1_err=self.points[i].ster[1]
+                y2=self.points[j].means[1]
+                y2_err=self.points[j].ster[1]
+                num=((x1-x2)**2)*(x1_err**2+x2_err**2)+((y1-y2)**2)*(y1_err**2+y2_err**2)
+                den=(x1-x2)**2+(y1-y2)**2
+                self.dist_data_error[i][j]=np.sqrt(num/den)
+    
+    def printPointDist(self):
+        print("Distances Between:\n")
+        print("0 & 3: " + str(self.dist_data[0][3]) + " +/- " + str(self.dist_data_error[0][3]))
+        print("1 & 2: " + str(self.dist_data[1][2]) + " +/- " + str(self.dist_data_error[1][2]))
+        print()
+        print("0 & 1: " + str(self.dist_data[0][1]) + " +/- " + str(self.dist_data_error[0][1]))
+        print("2 & 3: " + str(self.dist_data[2][3]) + " +/- " + str(self.dist_data_error[2][3]))
+        print()
+        print("0 & 2: " + str(self.dist_data[0][2]) + " +/- " + str(self.dist_data_error[0][2]))
+        print("1 & 3: " + str(self.dist_data[1][3]) + " +/- " + str(self.dist_data_error[1][3]))
     
     def angles(self):
         diff=self.points[0].means-self.points[3].means
@@ -87,6 +113,7 @@ class Fids:
         
 F=Fids('6-10-PatternMatchPosition-G.csv')
 F.pointDist()
+F.printPointDist()
 #F.angles()
 print("\n")
 
