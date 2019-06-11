@@ -37,7 +37,9 @@ class Fids:
                 x=np.vstack((x,self.data[i+j*4]))
             self.points.append(point(x))
             x=np.array([])
-            
+        
+        #self.dist_data=np.zeros([4,4])
+        #self.dist_data_error=np.zeros([4,4])
         self.dist_data=np.array([[ufloat(0,0),ufloat(0,0),ufloat(0,0),ufloat(0,0)],[ufloat(0,0),ufloat(0,0),ufloat(0,0),ufloat(0,0)],[ufloat(0,0),ufloat(0,0),ufloat(0,0),ufloat(0,0)],[ufloat(0,0),ufloat(0,0),ufloat(0,0),ufloat(0,0)]])
         self.dist_data_error=np.array([[ufloat(0,0),ufloat(0,0),ufloat(0,0),ufloat(0,0)],[ufloat(0,0),ufloat(0,0),ufloat(0,0),ufloat(0,0)],[ufloat(0,0),ufloat(0,0),ufloat(0,0),ufloat(0,0)],[ufloat(0,0),ufloat(0,0),ufloat(0,0),ufloat(0,0)]])
 
