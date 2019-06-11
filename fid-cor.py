@@ -6,8 +6,7 @@ from uncertainties import unumpy as unp
 from uncertainties import ufloat
 
 def get_means(x):
-    return(ufloat(x.mean(),0))
-    #return(ufloat(x.mean(),x.std()/np.sqrt(5)))
+    return(ufloat(x.mean(),x.std()/np.sqrt(5)))
     
 #def get_ster(x):
     #return(x.std()/np.sqrt(5))
@@ -84,6 +83,7 @@ class Fids:
     
     def cornerFidDist(self, cornerData):
         angle=np.mean(self.angles())
+        diff=[]
        # rotMat=np.array([[unp.cos(angle),unp.sin(angle)],[-unp.sin(angle),unp.cos(angle)]])
         
         #v1=np.matmul(rotMat,self.points[0].means.T)
@@ -97,9 +97,19 @@ class Fids:
                           -self.points[i].means[0]*unp.sin(angle)+self.points[i].means[1]*unp.cos(angle)])
             v2=np.array([cornerData[i][0]*unp.cos(angle)+cornerData[i][1]*unp.sin(angle),
                 -cornerData[i][0]*unp.sin(angle)+cornerData[i][1]*unp.cos(angle)])
-            diff=abs(v2-v1)
-            print(diff)
+            diff.append(abs(v2-v1))
+        return diff
             #print(abs(diff-np.array([.1275,.1535])))
+    
+    def printCornerFidDist(self, diff):
+        print("Corner Distances:")
+        print()
+        for i in range(4):
+            print("Corner #"+str(i)+":")
+            print("x: "+str(diff[i][0]))
+            print("y: "+str(diff[i][1]))
+            print()
+        
 
     def plotFid(self,point_data):
         plt.figure()
@@ -120,7 +130,7 @@ class Fids:
         
         plt.show()
         
-F=Fids('6-11-PatternMatchPosition-F.csv')
+F=Fids('6-11-man-data-F.csv')
 F.pointDist()
 F.printPointDist()
 #F.angles()
@@ -130,6 +140,7 @@ data=pd.read_csv("6-11-Coords.csv", sep=',',header=None)#read csv
 data=np.array(data)#Turn into numpy array
 data=np.delete(data,2,1)#delete z coordinate column - not needed and saves computation time
 print(data)
-F.cornerFidDist(data)
+diff=F.cornerFidDist(data)
+F.printCornerFidDist(diff)
 
 F.plotFid(data)
