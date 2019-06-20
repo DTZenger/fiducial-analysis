@@ -72,14 +72,29 @@ class point_histogram:
     
     
     def plot_histograms(self):
+        ideal_x=0.470
+        ideal_y=0.095
+        title_label="Mark G "
+#        stats=self.get_statistics()
+        
+        
         plt.figure()
-        plt.hist(self.rotated_diff[0],ec='black')
-        plt.title("x values")
+        plt.hist(self.rotated_diff[0],ec='black',color='skyblue')
+        plt.title("$\mu = ${0:.4f} $\sigma = ${1:.4f}".format(self.stats[0][1],self.stats[0][2]))
+        plt.axvline(ideal_x, color='k', linestyle='dashed', linewidth=1)
+        plt.axvline(ideal_x+0.02, color='r', linestyle='dashed', linewidth=1)
+        plt.axvline(ideal_x-0.02, color='r', linestyle='dashed', linewidth=1)
+
+        plt.suptitle("{}x values".format(title_label), fontweight='bold')
         plt.show()
         
         plt.figure()
-        plt.hist(self.rotated_diff[1],ec='black')
-        plt.title("y values")
+        plt.hist(self.rotated_diff[1],ec='black',color='skyblue')
+        plt.suptitle("{}y values".format(title_label), fontweight='bold')
+        plt.axvline(ideal_y, color='k', linestyle='dashed', linewidth=1)
+        plt.axvline(ideal_y+0.02, color='r', linestyle='dashed', linewidth=1)
+        plt.axvline(ideal_y-0.02, color='r', linestyle='dashed', linewidth=1)
+        plt.title("$\mu = ${0:.4f} $\sigma = ${1:.4f}".format(self.stats[1][1],self.stats[1][2]))
         plt.show()
 
     def get_statistics(self):
@@ -90,12 +105,16 @@ class point_histogram:
         Ideal values for dx:
             F: 0.1275
             E: 0.250
+            I: 0.470
+            G: 1.145
         """
         t_vals_x=stats.ttest_1samp(self.rotated_diff[0],0.250)
         """
         Ideal values for dy:
             F: 0.1175
             E: 0.095
+            I: 0.095
+            G: 0.095
         """
         t_vals_y=stats.ttest_1samp(self.rotated_diff[1],0.095)
         n_vals=self.rotated_diff.shape[1]
@@ -103,21 +122,32 @@ class point_histogram:
         
         
         stat_vals=np.vstack((n,mean_values,std_values,sem_values,np.array([t_vals_x[1],t_vals_y[1]]))).T
+        self.stats=stat_vals
         df=pd.DataFrame(stat_vals)
 
-        df.rename(columns={0:'n',1:'mean',2:'std',3:'sem',4:'t p-value'},index={0:'x',1:'y'},inplace=True)
+        df.rename(columns={0:'n',1:'mean',2:'std',3:'sem',4:'t pvalue'},index={0:'x',1:'y'},inplace=True)
         print(df)
         print(t_vals_x)
         print(t_vals_y)
+        return df
 
 if __name__ == '__main__':
-    ph=point_histogram("6-13-PatternMatchPosition-E.csv")
+    ph=point_histogram("6-13-PatternMatchPosition-I.csv")
     
     data=pd.read_csv("6-13-Coords.csv", sep=',',header=None)#read csv
     data=np.array(data)#Turn into numpy array
     data=np.delete(data,2,1)#delete z coordinate column - not needed and saves computation time
     
     ph.find_dx_dy(data)
-    ph.plot_histograms()
     ph.get_statistics()
+    ph.plot_histograms()
+    
+    corner_dist=np.zeros([4,4])
+    for i in range(4):
+        for j in range(i+1,4):
+            corner_dist[i][j]=corner_dist[j][i]=np.linalg.norm(data[i]-data[j])
+    print("\n~~~Corner data~~~")
+    print(corner_dist)
+
+    
     
