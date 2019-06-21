@@ -125,11 +125,11 @@ class point_histogram:
         
         ideals={'F':[97.366,97.7155],'E':[97.121,97.7605],'G':[95.331,97.7605],'I':[96.681,97.7605]}
         
-        mark='I'
+        mark='F'
         
         binw=0.0025
 
-        binh=np.arange(ideals[mark][0]-(0.01+binw/2),ideals[mark][0]+(0.02+binw/2),binw)
+#        binh=np.arange(ideals[mark][0]-(0.01+binw/2),ideals[mark][0]+(0.02+binw/2),binw)
         
         
         horizontal_dist=np.array([])
@@ -137,39 +137,48 @@ class point_histogram:
         
         for i in range(self.data.shape[0]//4):
 
-            horizontal_dist=np.append(horizontal_dist,np.linalg.norm(self.data[4*i]-self.data[4*i+3]))
-            horizontal_dist=np.append(horizontal_dist,np.linalg.norm(self.data[4*i+1]-self.data[4*i+2]))
+#            horizontal_dist=np.append(horizontal_dist,np.linalg.norm(self.data[4*i]-self.data[4*i+3]))
+#            horizontal_dist=np.append(horizontal_dist,np.linalg.norm(self.data[4*i+1]-self.data[4*i+2]))
             
-            vertical_dist=np.append(vertical_dist,np.linalg.norm(self.data[4*i]-self.data[4*i+1]))
-            vertical_dist=np.append(vertical_dist,np.linalg.norm(self.data[4*i+2]-self.data[4*i+3]))
+#            vertical_dist=np.append(vertical_dist,np.linalg.norm(self.data[4*i]-self.data[4*i+1]))
+#            vertical_dist=np.append(vertical_dist,np.linalg.norm(self.data[4*i+2]-self.data[4*i+3]))
+            
+            
+            horizontal_dist=np.append(horizontal_dist,(ideals[mark][0]-np.linalg.norm(self.data[4*i]-self.data[4*i+3]))*1000)
+            horizontal_dist=np.append(horizontal_dist,(ideals[mark][0]-np.linalg.norm(self.data[4*i+1]-self.data[4*i+2]))*1000)
+            
+            vertical_dist=np.append(vertical_dist,(ideals[mark][1]-np.linalg.norm(self.data[4*i]-self.data[4*i+1]))*1000)
+            vertical_dist=np.append(vertical_dist,(ideals[mark][1]-np.linalg.norm(self.data[4*i+2]-self.data[4*i+3]))*1000)
 
         
         plt.figure()
-        plt.hist(horizontal_dist,ec='black',bins=binh)
+#        plt.hist(horizontal_dist,ec='black',bins=binh)
+        plt.hist(horizontal_dist,ec='black')
         plt.suptitle("Mark {} Horizontal Distances".format(mark), fontweight='bold')
-        plt.title("$\mu = ${0:.4f}(mm); $\sigma = ${1:.4f}(mm); bin size = {2} mm".format(np.mean(horizontal_dist),np.std(horizontal_dist),binw))
-        plt.axvline(ideals[mark][0], color='k', linestyle='dashed', linewidth=1,label='ideal')
+        plt.title("$\mu = ${0:.4f}($\mu m$); $\sigma = ${1:.4f}($\mu m$); bin size = {2} mm".format(np.mean(horizontal_dist),np.std(horizontal_dist),binw))
+#        plt.axvline(ideals[mark][0], color='k', linestyle='dashed', linewidth=1,label='ideal')
         plt.ylabel("Count")
-        plt.legend()
-        binx2=[i+binw/2. for i in binh]
-        plt.xticks(binx2,rotation=45)
+#        plt.legend()
+#        binx2=[i+binw/2. for i in binh]
+#        plt.xticks(binx2,rotation=45)
         
         plt.show()
         
-        binv=np.arange(ideals[mark][1]-(0.01+binw/2),ideals[mark][1]+(0.02+binw/2),binw)
+#        binv=np.arange(ideals[mark][1]-(0.01+binw/2),ideals[mark][1]+(0.02+binw/2),binw)
         
         
         
         plt.figure()
-        plt.hist(vertical_dist,ec='black',bins=binv)
+#        plt.hist(vertical_dist,ec='black',bins=binv)
+        plt.hist(vertical_dist,ec='black')
         plt.suptitle("Mark {} Vertical Distances".format(mark), fontweight='bold')
         plt.title("$\mu = ${0:.4f}(mm); $\sigma = ${1:.4f}(mm); bin size = {2} mm".format(np.mean(vertical_dist),np.std(vertical_dist),binw))
-        plt.axvline(ideals[mark][1], color='k', linestyle='dashed', linewidth=1,label='ideal')
+#        plt.axvline(ideals[mark][1], color='k', linestyle='dashed', linewidth=1,label='ideal')
         plt.ylabel("Count")
-        plt.legend()
-        binx2=[i+binw/2. for i in binv]
+#        plt.legend()
+#        binx2=[i+binw/2. for i in binv]
         
-        plt.xticks(binx2,rotation=45)
+#        plt.xticks(binx2,rotation=45)
         plt.show()
         
     def show_fid_to_fid_over_time(self):
@@ -237,6 +246,37 @@ class point_histogram:
         ax8.title.set_text("D to A, Constant D")
         plt.tight_layout()
 
+    def plot_dist_over_time(self):
+        
+        
+        C_to_D=np.array([])
+        A_to_B=np.array([])
+        B_to_C=np.array([])
+        D_to_A=np.array([])
+        
+        for i in range(self.data.shape[0]//4):
+
+            C_to_D=np.append(C_to_D,np.linalg.norm(self.data[4*i]-self.data[4*i+3]))
+            A_to_B=np.append(A_to_B,np.linalg.norm(self.data[4*i+1]-self.data[4*i+2]))
+            
+            B_to_C=np.append(B_to_C,np.linalg.norm(self.data[4*i]-self.data[4*i+1]))
+            D_to_A=np.append(D_to_A,np.linalg.norm(self.data[4*i+2]-self.data[4*i+3]))
+            
+        fig, ((ax1, ax2), (ax3, ax4)) = plt.subplots(2, 2,figsize=[10,10])
+        
+        ax1.plot(C_to_D,'-ok')
+        ax1.title.set_text("D to C")
+        ax1.axis([-0.5,self.data.shape[0]//4,97.3665,97.37])
+        ax2.plot(A_to_B,'k-o')
+        ax2.axis([-0.5,self.data.shape[0]//4,97.3665,97.37])
+        ax2.title.set_text("A to B")
+        ax3.plot(B_to_C,'k-o')
+        ax3.title.set_text("C to B")
+        ax3.axis([-0.5,self.data.shape[0]//4,97.7175,97.7205])
+        ax4.plot(D_to_A,'k-o')
+        ax4.title.set_text("D to A")
+        ax4.axis([-0.5,self.data.shape[0]//4,97.7175,97.7205])
+        plt.tight_layout()
         
 
     def get_statistics(self):
@@ -272,9 +312,58 @@ class point_histogram:
 #        print(t_vals_x)
 #        print(t_vals_y)
         return df
+    
+    def find_differences(self):
+        idealx=1.145
+        idealy=0.095
+        nums=np.copy(self.rotated_diff)
+        maxes=np.max(nums,axis=1)
+        mins=np.min(nums,axis=1)
+        
+        maxes[0]+=(-idealx)
+        maxes[1]+=(-idealy)
+        mins[0]+=(-idealx)
+        mins[1]+=(-idealy)
+        
+        maxes=abs(maxes)
+        mins=abs(mins)
+        
+        print("max x: {}; max y: {}; min x:{}; min y:{}".format(maxes[0],maxes[1],mins[0],mins[1]))
+        
+    def find_fid_fid_max_defection(self):
+        ideals={'F':[97.366,97.7155],'E':[97.121,97.7605],'G':[95.331,97.7605],'I':[96.681,97.7605]}
+        
+        mark='G'
+        
+
+#        binh=np.arange(ideals[mark][0]-(0.01+binw/2),ideals[mark][0]+(0.02+binw/2),binw)
+        
+        
+        horizontal_dist=np.array([])
+        vertical_dist=np.array([])
+        
+        for i in range(self.data.shape[0]//4):
+
+#            horizontal_dist=np.append(horizontal_dist,np.linalg.norm(self.data[4*i]-self.data[4*i+3]))
+#            horizontal_dist=np.append(horizontal_dist,np.linalg.norm(self.data[4*i+1]-self.data[4*i+2]))
+            
+#            vertical_dist=np.append(vertical_dist,np.linalg.norm(self.data[4*i]-self.data[4*i+1]))
+#            vertical_dist=np.append(vertical_dist,np.linalg.norm(self.data[4*i+2]-self.data[4*i+3]))
+            
+            
+            horizontal_dist=np.append(horizontal_dist,(ideals[mark][0]-np.linalg.norm(self.data[4*i]-self.data[4*i+3]))*1000)
+            horizontal_dist=np.append(horizontal_dist,(ideals[mark][0]-np.linalg.norm(self.data[4*i+1]-self.data[4*i+2]))*1000)
+            
+            vertical_dist=np.append(vertical_dist,(ideals[mark][1]-np.linalg.norm(self.data[4*i]-self.data[4*i+1]))*1000)
+            vertical_dist=np.append(vertical_dist,(ideals[mark][1]-np.linalg.norm(self.data[4*i+2]-self.data[4*i+3]))*1000)
+            
+        horizontal_dist=abs(horizontal_dist)
+        vertical_dist=abs(vertical_dist)
+        
+        print("Mark {}: horizontal max deflection: {}; vertical max deflection: {}".format(mark,np.max(horizontal_dist),np.max(vertical_dist)))
 
 if __name__ == '__main__':
-    ph=point_histogram("6-13-PatternMatchPosition-I.csv")
+    ph=point_histogram("6-13-PatternMatchPosition-G.csv")
     
     data=pd.read_csv("6-13-Coords.csv", sep=',',header=None)#read csv
     data=np.array(data)#Turn into numpy array
@@ -283,9 +372,12 @@ if __name__ == '__main__':
     ph.find_dx_dy(data)
     ph.get_statistics()
 #    ph.plot_histograms()
-    ph.plot_fid_to_fid_histo()
+#    ph.plot_fid_to_fid_histo()
 #    ph.show_fid_to_fid_over_time()
+#    ph.plot_dist_over_time()
     
+#    ph.find_differences()
+    ph.find_fid_fid_max_defection()
     """
     corner_dist=np.zeros([4,4])
     for i in range(4):
