@@ -52,6 +52,7 @@ class point_histogram:
 #        angle=self.find_angle(self.data)
         angle=self.find_angle2()
         print(angle)
+        self.angle=angle
         differences=np.array([0,0])
         
         for i in range(self.data.shape[0]//4):
@@ -74,28 +75,169 @@ class point_histogram:
     def plot_histograms(self):
         ideal_x=0.470
         ideal_y=0.095
-        title_label="Mark G "
+        title_label="Mark I "
 #        stats=self.get_statistics()
         
         
         plt.figure()
-        plt.hist(self.rotated_diff[0],ec='black',color='skyblue')
-        plt.title("$\mu = ${0:.4f} $\sigma = ${1:.4f}".format(self.stats[0][1],self.stats[0][2]))
-        plt.axvline(ideal_x, color='k', linestyle='dashed', linewidth=1)
-        plt.axvline(ideal_x+0.02, color='r', linestyle='dashed', linewidth=1)
+        
+        binw=0.0025
+        
+        binx=np.arange(ideal_x-(binw/2.+0.02),ideal_x+(binw/2.+0.02),binw)
+        myhist=plt.hist(self.rotated_diff[0],ec='black',color='skyblue',bins=binx)
+        plt.title("$\mu = ${0:.4f} (mm) $\sigma = ${1:.4f} (mm)".format(self.stats[0][1],self.stats[0][2]))
+        plt.axvline(ideal_x, color='k', linestyle='dashed', linewidth=1,label="ideal")
+        plt.axvline(ideal_x+0.02, color='r', linestyle='dashed', linewidth=1,label="tolerance")
         plt.axvline(ideal_x-0.02, color='r', linestyle='dashed', linewidth=1)
+        
+        binx2=[i+binw/2. for i in binx] #np.arange(ideal_x-0.02,ideal_x+0.02,0.005)
+        plt.xticks(binx2,rotation=45)
+        
+        for label in myhist.ax.xaxis.get_ticklabels()[::2]:
+            label.set_visible(False)
+        
+        plt.legend()
+        plt.xlabel("$\Delta$x Value (mm)")
+        plt.ylabel("Counts")
 
-        plt.suptitle("{}x values".format(title_label), fontweight='bold')
+        plt.suptitle("{}$\Delta$x values".format(title_label), fontweight='bold')
         plt.show()
         
+        biny=np.arange(ideal_y-(binw/2.+0.02),ideal_y+(binw/2.+0.02),binw)
+        
         plt.figure()
-        plt.hist(self.rotated_diff[1],ec='black',color='skyblue')
-        plt.suptitle("{}y values".format(title_label), fontweight='bold')
-        plt.axvline(ideal_y, color='k', linestyle='dashed', linewidth=1)
-        plt.axvline(ideal_y+0.02, color='r', linestyle='dashed', linewidth=1)
+        plt.hist(self.rotated_diff[1],ec='black',color='skyblue',bins=biny)
+        plt.suptitle("{}$\Delta$y values".format(title_label), fontweight='bold')
+        plt.axvline(ideal_y, color='k', linestyle='dashed', linewidth=1,label='ideal')
+        plt.axvline(ideal_y+0.02, color='r', linestyle='dashed', linewidth=1,label='tolerance')
         plt.axvline(ideal_y-0.02, color='r', linestyle='dashed', linewidth=1)
-        plt.title("$\mu = ${0:.4f} $\sigma = ${1:.4f}".format(self.stats[1][1],self.stats[1][2]))
+        plt.title("$\mu = ${0:.4f} (mm) $\sigma = ${1:.4f} (mm)".format(self.stats[1][1],self.stats[1][2]))
+        plt.legend()
+        
+        biny=[i+binw/2. for i in biny]
+        plt.xticks(biny,rotation=45)
+        
+        plt.xlabel("$\Delta$y Value (mm)")
+        plt.ylabel("Counts")
         plt.show()
+        
+    def plot_fid_to_fid_histo(self):
+        
+        ideals={'F':[97.366,97.7155],'E':[97.121,97.7605],'G':[95.331,97.7605],'I':[96.681,97.7605]}
+        
+        mark='I'
+        
+        binw=0.0025
+
+        binh=np.arange(ideals[mark][0]-(0.01+binw/2),ideals[mark][0]+(0.02+binw/2),binw)
+        
+        
+        horizontal_dist=np.array([])
+        vertical_dist=np.array([])
+        
+        for i in range(self.data.shape[0]//4):
+
+            horizontal_dist=np.append(horizontal_dist,np.linalg.norm(self.data[4*i]-self.data[4*i+3]))
+            horizontal_dist=np.append(horizontal_dist,np.linalg.norm(self.data[4*i+1]-self.data[4*i+2]))
+            
+            vertical_dist=np.append(vertical_dist,np.linalg.norm(self.data[4*i]-self.data[4*i+1]))
+            vertical_dist=np.append(vertical_dist,np.linalg.norm(self.data[4*i+2]-self.data[4*i+3]))
+
+        
+        plt.figure()
+        plt.hist(horizontal_dist,ec='black',bins=binh)
+        plt.suptitle("Mark {} Horizontal Distances".format(mark), fontweight='bold')
+        plt.title("$\mu = ${0:.4f}(mm); $\sigma = ${1:.4f}(mm); bin size = {2} mm".format(np.mean(horizontal_dist),np.std(horizontal_dist),binw))
+        plt.axvline(ideals[mark][0], color='k', linestyle='dashed', linewidth=1,label='ideal')
+        plt.ylabel("Count")
+        plt.legend()
+        binx2=[i+binw/2. for i in binh]
+        plt.xticks(binx2,rotation=45)
+        
+        plt.show()
+        
+        binv=np.arange(ideals[mark][1]-(0.01+binw/2),ideals[mark][1]+(0.02+binw/2),binw)
+        
+        
+        
+        plt.figure()
+        plt.hist(vertical_dist,ec='black',bins=binv)
+        plt.suptitle("Mark {} Vertical Distances".format(mark), fontweight='bold')
+        plt.title("$\mu = ${0:.4f}(mm); $\sigma = ${1:.4f}(mm); bin size = {2} mm".format(np.mean(vertical_dist),np.std(vertical_dist),binw))
+        plt.axvline(ideals[mark][1], color='k', linestyle='dashed', linewidth=1,label='ideal')
+        plt.ylabel("Count")
+        plt.legend()
+        binx2=[i+binw/2. for i in binv]
+        
+        plt.xticks(binx2,rotation=45)
+        plt.show()
+        
+    def show_fid_to_fid_over_time(self):
+        
+        all_vals=np.array([])
+
+        vals=np.array([])
+        
+        for i in range(self.data.shape[0]//4):
+            all_vals=np.append(all_vals,np.linalg.norm(self.data[0]-self.data[4*i+3]))
+        vals=np.array([])    
+        for i in range(self.data.shape[0]//4):
+            vals=np.append(vals,np.linalg.norm(self.data[2]-self.data[4*i+1]))
+        all_vals=np.vstack((all_vals,vals))
+        vals=np.array([])
+        
+        for i in range(self.data.shape[0]//4):
+            vals=np.append(vals,np.linalg.norm(self.data[0]-self.data[4*i+1]))
+        all_vals=np.vstack((all_vals,vals))
+        vals=np.array([])
+        for i in range(self.data.shape[0]//4):
+            vals=np.append(vals,np.linalg.norm(self.data[2]-self.data[4*i+3]))
+        all_vals=np.vstack((all_vals,vals))
+        
+        
+        vals=np.array([])
+        
+        for i in range(self.data.shape[0]//4):
+            vals=np.append(vals,np.linalg.norm(self.data[3]-self.data[4*i]))
+        all_vals=np.vstack((all_vals,vals))
+        vals=np.array([])    
+        for i in range(self.data.shape[0]//4):
+            vals=np.append(vals,np.linalg.norm(self.data[1]-self.data[4*i+2]))
+        all_vals=np.vstack((all_vals,vals))
+        vals=np.array([])
+        
+        for i in range(self.data.shape[0]//4):
+            vals=np.append(vals,np.linalg.norm(self.data[1]-self.data[4*i]))
+        all_vals=np.vstack((all_vals,vals))
+        vals=np.array([])
+        for i in range(self.data.shape[0]//4):
+            vals=np.append(vals,np.linalg.norm(self.data[3]-self.data[4*i+2]))
+        all_vals=np.vstack((all_vals,vals))
+  
+
+            
+        fig, ((ax1, ax2), (ax3, ax4), (ax5, ax6), (ax7, ax8)) = plt.subplots(4, 2,figsize=[10,10])
+#        plt.suptitle("C and A held constant",y=0.93,va='center')
+        ax1.plot(all_vals[0],'k-o')
+        ax1.title.set_text("D to C, Constant C")
+        ax2.plot(all_vals[1],'k-o')
+        ax2.title.set_text("A to B, Constant A")
+        ax3.plot(all_vals[2],'k-o')
+        ax3.title.set_text("C to B, Constant C")
+        ax4.plot(all_vals[3],'k-o')
+        ax4.title.set_text("D to A, Constant A")
+        
+        ax5.plot(all_vals[4],'k-o')
+        ax5.title.set_text("D to C, Constant D")
+        ax6.plot(all_vals[5],'k-o')
+        ax6.title.set_text("A to B, Constant B")
+        ax7.plot(all_vals[6],'k-o')
+        ax7.title.set_text("C to B, Constant B")
+        ax8.plot(all_vals[7],'k-o')
+        ax8.title.set_text("D to A, Constant D")
+        plt.tight_layout()
+
+        
 
     def get_statistics(self):
         mean_values=np.mean(self.rotated_diff,axis=1)
@@ -126,9 +268,9 @@ class point_histogram:
         df=pd.DataFrame(stat_vals)
 
         df.rename(columns={0:'n',1:'mean',2:'std',3:'sem',4:'t pvalue'},index={0:'x',1:'y'},inplace=True)
-        print(df)
-        print(t_vals_x)
-        print(t_vals_y)
+#        print(df)
+#        print(t_vals_x)
+#        print(t_vals_y)
         return df
 
 if __name__ == '__main__':
@@ -140,14 +282,19 @@ if __name__ == '__main__':
     
     ph.find_dx_dy(data)
     ph.get_statistics()
-    ph.plot_histograms()
+#    ph.plot_histograms()
+    ph.plot_fid_to_fid_histo()
+#    ph.show_fid_to_fid_over_time()
     
+    """
     corner_dist=np.zeros([4,4])
     for i in range(4):
         for j in range(i+1,4):
             corner_dist[i][j]=corner_dist[j][i]=np.linalg.norm(data[i]-data[j])
     print("\n~~~Corner data~~~")
     print(corner_dist)
+    """
+    
 
     
     
