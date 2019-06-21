@@ -6,7 +6,7 @@ from uncertainties import unumpy as unp
 from uncertainties import ufloat
 
 def get_means(x):
-    return(ufloat(x.mean(),x.std()/np.sqrt(5)))
+    return(ufloat(x.mean(),x.std()/np.sqrt(x.shape[0])))
     
 #def get_ster(x):
     #return(x.std()/np.sqrt(5))
@@ -75,8 +75,9 @@ class Fids:
     
     def angles(self):
         diff=self.points[0].means-self.points[3].means
+        #diff=[x0-x1,y0-y1]
         a1=unp.arctan(diff[1]/diff[0])
-        diff=self.points[2].means-self.points[1].means
+        diff=self.points[1].means-self.points[2].means
         a2=unp.arctan(diff[1]/diff[0])
         
         print("\n{} {}\n".format(a1,a2))
@@ -132,17 +133,50 @@ class Fids:
         
         plt.show()
         
-F=Fids('6-11-man-data-F.csv')
+        
+    def plot_diff_histo(self,point_data):
+        x_data,y_data=np.array([]),np.array([])
+        
+        for i in range(4):
+            x_data=np.append(x_data,abs(point_data[i][0]-self.points[i].data[0]))
+            y_data=np.append(y_data,abs(point_data[i][1]-self.points[i].data[1]))
+        
+        plt.figure()
+        plt.hist(x_data,ec='black')
+        plt.title("x")
+        plt.figure()
+        plt.hist(y_data,ec='black')
+        plt.title('y')
+        
+        
+        
+        
+        
+        
+        
+        
+#~~~MAIN~~~#        
+F=Fids('6-13-PatternMatchPosition-BetterF.csv')
 F.pointDist()
 F.printPointDist()
 #F.angles()
 print("\n")
 
-data=pd.read_csv("6-11-Coords.csv", sep=',',header=None)#read csv
+data=pd.read_csv("6-13-Coords.csv", sep=',',header=None)#read csv
 data=np.array(data)#Turn into numpy array
 data=np.delete(data,2,1)#delete z coordinate column - not needed and saves computation time
-print(data)
-diff=F.cornerFidDist(data)
-F.printCornerFidDist(diff)
-
+#print(data)
+#diff=F.cornerFidDist(data)
+#F.printCornerFidDist(diff)
+F.plot_diff_histo(data)
+#angle1,angle2=data[0]-data[3],data[2]-data[1]
+#angle1,angle2=np.arctan(angle1[1]/angle1[0]),np.arctan(angle2[1]/angle2[0])
+#print("~~~Corner angles~~~\n{} {}\n".format(angle1,angle2))
+"""
+corner_dist=np.zeros([4,4])
+for i in range(4):
+    for j in range(i+1,4):
+        corner_dist[i][j]=corner_dist[j][i]=np.linalg.norm(data[i]-data[j])
+print(corner_dist)
 F.plotFid(data)
+"""
